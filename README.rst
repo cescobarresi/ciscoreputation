@@ -40,11 +40,13 @@ Installation
 Install directly from PyPi:
 
 .. code-block::
+
     $ pip install ciscoreputation
     
 Or from the debian package:
 
 .. code-block::
+
     $ sudo gdebi ciscoreputation-[version]_[platform].deb
 
 Requirements
