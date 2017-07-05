@@ -35,14 +35,20 @@ Usage
 Installation
 ------------
 
-Install directly from PyPi:
+Install from PyPi:
+
+When installing form PyPi is better to use a virtual environment, when installing the debian package a virtual environment is automatically created and used.
 
 .. code-block::
-    $ pip install ciscoreputation
+
+    $ virtaulenv cisco-env
+    $ source cisco-env/bin/activate
+    (cisco-env)$ pip install ciscoreputation
     
 Or from the debian package:
 
 .. code-block::
+
     $ sudo gdebi ciscoreputation-[version]_[platform].deb
 
 Requirements

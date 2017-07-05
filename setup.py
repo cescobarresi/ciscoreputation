@@ -136,7 +136,7 @@ setup(
     # value is passed to sys.exit(), so you can return an errorlevel or message
     # to print to stderr.
         'console_scripts': [
-            'ciscoreputation=ciscoreputation:do_main',
+            'ciscoreputation=ciscoreputation:main',
         ],
     },
     cmdclass={
