@@ -1,7 +1,7 @@
 ciscoreputation
 ===============
 
-Get the Cisco's `senderbase.org`_ reputation for a Host or IP address
+Get the Cisco's `talosintelligence.com`_ email reputation for an IP address
 
 Usage
 -----
@@ -9,30 +9,28 @@ Usage
 .. code-block::
 
     ciscoreputation
-    Get the email reputation for a hostname or IP address from senderbase.org
+    Get the email reputation for an IP address from talosintelligence.com
 
     Usage:
         ciscoreputation <query> [options]
         ciscoreputation reputation <query> [options]
         ciscoreputation volumes <query> [options]
-        ciscoreputation alldata <query> [options]
         ciscoreputation --help
 
     Commands:
-        reputation      Get the reputation
-        volumes         Get the volume for last month and current day
-        alldata         Get the unparsed tabbed data
+        reputation      Get the reputation for the given <query>
+        volumes         Get the volume for last month and current day for the given <query>
 
     Arguments:
-        query           The hostname or IP to query for
+        query           The ip address to query for.
 
     Options:
-        --tos                  Accept SenderBase Term of Service
+        --tos                  Accept TalosIntelligence Term of Service
         --values               Output only the requested value, useful when using in another script
         --version              Print version.
         -h --help              Show this screen.
 
-    Note: Cisco requires not to exceed 1000 queries per calendar day per IP or subnet.
+    Note: Use wisely, don't query like crazy.
 
 Installation
 ------------
@@ -49,7 +47,6 @@ Or from the debian package:
 
 Requirements
 ^^^^^^^^^^^^
-* `BeautifulSoup4`_
 * `requests`_
 * `docopts`_
 
@@ -63,8 +60,7 @@ Authors
 
 `ciscoreputation` was written by `Francesco Barresi`_ `@cescobarresi`_.
 
-.. _senderbase.org: http://www.senderbase.org/
-.. _BeautifulSoup4: https://www.crummy.com/software/BeautifulSoup
+.. _talosintelligence.com: https://talosintelligence.com/reputation_center/
 .. _requests: http://python-requests.org/
 .. _docopts: https://github.com/docopt/docopt
 .. _Francesco Barresi: https://github.com/cescobarresi

@@ -125,7 +125,7 @@ setup(
 
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed. 
-    install_requires=['docopt','requests','beautifulsoup4'],
+    install_requires=['docopt','requests'],
 
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow

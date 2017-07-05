@@ -3,13 +3,12 @@
 # filetype: python
 """
 ciscoreputation
-Get the email reputation for a hostname or IP address from senderbase.org
+Get the email reputation for an IP address from talosintelligence.com
 
 Usage:
     ciscoreputation <query> [options]
     ciscoreputation reputation <query> [options]
     ciscoreputation volumes <query> [options]
-    ciscoreputation alldata <query> [options]
     ciscoreputation --help
 
 Commands:
@@ -17,107 +16,57 @@ Commands:
     volumes         Get the volume for last month and current day for the given <query>
 
 Arguments:
-    query    May be an <query> of domain name.
+    query           The ip address to query for.
 
 Options:
-    --tos                  Accept SenderBase Term of Service
+    --tos                  Accept TalosIntelligence Term of Service
     --values               Output only the requested value, useful when using in another script
     --version              Print version.
     -h --help              Show this screen.
 
-Note: Cisco requires not to exceed 1000 queries per calendar day per IP or subnet.
+Note: Use wisely, don't query like crazy.
 """
 from __about__ import __version__
 from docopt import docopt
+import requests, re, socket
 
-import requests, re
-from bs4 import BeautifulSoup
-
-def get_authhash_searchby(search_string):
+def get_data(search_string, search_by='ip'):
     """
-    Get the authHash code from senderbase, if necessary accept the TOS, and the search_by type.
-
-    :param ip: the ip address
-    return: authHash, search_by
-    """
-    # Get web page
-    r = requests.get('http://www.senderbase.org/lookup/?search_string=%s' % search_string)
-
-    if r.status_code != 200:
-        return None, r.status_code
-
-    soup = BeautifulSoup(r.text, 'html.parser')
-
-    # Need to accept TOS?
-    if soup.find("input", id="tos_accepted", class_="button"):
-        tos_accepted = soup.find("input", id="tos_accepted", class_="button").attrs['value']
-        r = requests.post('http://www.senderbase.org/' + soup.find_all("form", method="POST")[0].attrs['action'],
-                data={'tos_accepted':tos_accepted})
-
-    soup = BeautifulSoup(r.text, 'html.parser')
-
-    # Can't find any result
-    if soup.find("div", class_="text_warning", text=re.compile("we can't find any results")):
-        return None, "can't find any results for search '%s'" % search_string
-
-    # Get authHash
-    auth_hash = soup.find("script", string=re.compile("var authHash"))
-    auth_hash = re.search("authHash *= *'([^ ']+)", auth_hash.text).group(1)
-
-    # Get search_by
-    search_by = soup.find("script", string=re.compile("loadTabIP\(\)"))
-    search_by = re.search("searchBy: '([^ ']+)", search_by.text).group(1)
-    return auth_hash, search_by
-
-def get_tabdata(search_string, search_by, auth_hash):
-    """
-    Download tabbed data from senderbase.org for the given IP
+    Download data from talosintelligence.com for the given IP
 
     Return tabbed data text
     """
-    # get query type
-
-    r = requests.get('http://www.senderbase.org/lookup/export/',
+    r_details = requests.get('https://talosintelligence.com/sb_api/query_lookup',
             params = {
-                "search_by":search_by,
-                "search_string":search_string,
-                "order":'lastmonth desc',
-                "fields":'["ip","hostname","lastday","lastmonth","email_score_name"]',
-                "export_type":"plaintext_unix",
-                "auth":auth_hash})
-    if r.status_code != 200:
-        return r.status_code
+                'query':'/api/v2/details/ip/',
+                'query_entry':search_string
+                }).json()
 
-    return r.text
+    r_wscore = requests.get('https://talosintelligence.com/sb_api/remote_lookup',
+            params = {'hostname':'SDS', 'query_string':'/score/wbrs/json?url=%s' % search_string}).json()
+    # would be nice to plot this values
+    #r_volume = requests.get('https://talosintelligence.com/sb_api/query_lookup',
+    #        params = {
+    #            'query':'/api/v2/volume/ip/',
+    #            'query_entry':search_string
+    #            }).json()
 
-def parse_tabdata(search_string, search_by, data):
-    """
-    Parse tabbed data from senderbase.org for the given search_string
-
-    return: dict with values.
-    """
-    # Extract values
-    values = []
-    for line in data.splitlines():
-        if line[0] == "#":
-            # skip comments
-            continue
-        values = line.split("\t")
-        # search the line with the requested IP when searching by IP.
-        if search_by == 'ip' and values[0].split(" ")[0] == search_string:
-            break
-        elif search_by != 'ip':
-            break
-
-    if len(values) < 5:
-        return None
+    # No used for now
+    #r_related_ips = requests.get('https://talosintelligence.com/sb_api/query_lookup',
+    #        params = {
+    #            'query':'/api/v2/related_ips/ip/',
+    #            'query_entry':search_string
+    #            }).json()
 
     data = {
-        'address':values[0].split(" ")[0],
-        'hostname':values[1],
-        'lastday_volume':values[2],
-        'month_volume':values[3],
-        'email_reputation':values[4],
+        'address':search_string,
+        'hostname':r_details['hostname'] if 'hostname' in r_details else "nodata",
+        'volume_change':r_details['daychange'] if 'daychange' in r_details else "nodata",
+        'lastday_volume':r_details['daily_mag'] if 'daily_mag' in r_details else "nodata",
+        'month_volume':r_details['monthly_mag'] if 'monthly_mag' in r_details else "nodata",
+        'email_reputation':r_details['email_score_name'] if 'email_score_name' in r_details else "nodata",
+        'weighted_reputation_score':r_wscore[0]['response']['wbrs']['score'],
+        #'volumes':zip(*r_volume['data'])
     }
 
     return data
@@ -134,21 +83,14 @@ def do_main():
         print "Must explicitly accept Term of Use setting option '--tos'"
         raise SystemExit(-1)
 
-    # get authHash and search_by
-    auth_hash, search_by = get_authhash_searchby(arguments['<query>'])
-    if not auth_hash:
-        if arguments['--values']:
-            print "unknown"
-        else:
-            print "Reputation: unknown\n Got status code: %s" % search_by
-        raise SystemExit
+    try:
+        socket.inet_aton(arguments['<query>'])
+    except socket.error:
+        print "Error: <query> must be a valid IP address. Found: %s" % arguments['<query>']
+        raise SystemExit(-1)
 
-    if not arguments['--values']:
-        print " got authHash:", auth_hash
-        print " got search_by:", search_by
-
-    # Get tab separated data
-    data = get_tabdata(arguments['<query>'], search_by, auth_hash)
+    # Get data
+    data = get_data(arguments['<query>'])
     if not data:
         if arguments['--values']:
             print "unknown"
@@ -162,39 +104,32 @@ def do_main():
             print "Reputation: unknown\n Got status code: %s" % data
         raise SystemExit
 
-    # Output tabbed data as is
-    if arguments['alldata']:
-        if arguments['--values']:
-            data = data.splitlines()
-            print "\n".join(data[3:])
-        else:
-            print data
-        raise SystemExit
-
-    # Parse tabbed data
-    data = parse_tabdata(arguments['<query>'], search_by, data)
-
     # Output volumes
     if arguments['volumes']:
         if arguments['--values']:
             print "%s,%s" % (data['month_volume'], data['lastday_volume'])
         else:
-            print "senderbase.org data for %s [%s]" % (data['address'], data['hostname'])
+            print "talosintelligence.com data for %s [%s]" % (data['address'], data['hostname'])
             print "Last month volume: %s\nDay volume: %s" % (data['month_volume'], data['lastday_volume'])
     # Output reputation
     elif arguments['reputation']:
         if arguments['--values']:
             print data['email_reputation']
         else:
-            print "senderbase.org data for %s [%s]" % (data['address'], data['hostname'])
+            print "talosintelligence.com data for %s [%s]" % (data['address'], data['hostname'])
             print "Email reputation: %s" % data['email_reputation']
     # Ouput all
     else:
         if arguments['--values']:
-            print "%s,%s,%s" % (data['email_reputation'],data['month_volume'], data['lastday_volume'])
+            print "%s,%s,%s,%s" % (
+                    data['email_reputation'],
+                    data['weighted_reputation_score'],
+                    data['month_volume'],
+                    data['lastday_volume'])
         else:
-            print "senderbase.org data for %s [%s]" % (data['address'], data['hostname'])
+            print "talosintelligence.com data for %s [%s] " % (data['address'], data['hostname'])
             print "Email reputation: %s" % data['email_reputation']
+            print "Email score: %s" % data['weighted_reputation_score']
             print "Last month volume: %s\nDay volume: %s" % (data['month_volume'], data['lastday_volume'])
 
 
