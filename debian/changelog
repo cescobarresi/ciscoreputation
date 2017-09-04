@@ -1,3 +1,9 @@
+ciscoreputation (2.0.1) xenial; urgency=medium
+
+  * Cat and mouse: added REFERER HTTP Header to GET resquests.
+
+ -- Francesco Barresi <@cescobarresi>  Mon, 04 Sep 2017 12:16:37 +0200
+
 ciscoreputation (2.0.0) xenial; urgency=medium
 
   * Updated to work with talosintelligence.com Reputation Center

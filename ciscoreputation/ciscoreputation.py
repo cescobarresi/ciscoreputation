@@ -37,12 +37,14 @@ def get_data(search_string, search_by='ip'):
     Return tabbed data text
     """
     r_details = requests.get('https://talosintelligence.com/sb_api/query_lookup',
+            headers={'referer':'https://talosintelligence.com/reputation_center/lookup?search=%s'%search_string},
             params = {
                 'query':'/api/v2/details/ip/',
                 'query_entry':search_string
                 }).json()
 
     r_wscore = requests.get('https://talosintelligence.com/sb_api/remote_lookup',
+            headers={'referer':'https://talosintelligence.com/reputation_center/lookup?search=%s'%search_string},
             params = {'hostname':'SDS', 'query_string':'/score/wbrs/json?url=%s' % search_string}).json()
     # would be nice to plot this values
     #r_volume = requests.get('https://talosintelligence.com/sb_api/query_lookup',
@@ -65,7 +67,8 @@ def get_data(search_string, search_by='ip'):
         'lastday_volume':r_details['daily_mag'] if 'daily_mag' in r_details else "nodata",
         'month_volume':r_details['monthly_mag'] if 'monthly_mag' in r_details else "nodata",
         'email_reputation':r_details['email_score_name'] if 'email_score_name' in r_details else "nodata",
-        'weighted_reputation_score':r_wscore[0]['response']['wbrs']['score'],
+        'weighted_reputation_score':r_wscore['response']
+        #'weighted_reputation_score':r_wscore[0]['response']['wbrs']['score'],
         #'volumes':zip(*r_volume['data'])
     }
 

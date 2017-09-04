@@ -29,7 +29,7 @@ __uri__ = "https://github.com/cescobarresi/ciscoreputation"
 #    zero or more release candidates (denoted with a ”.rcN” suffix)
 # 
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 __author__ = "Francesco Barresi"
 __email__ = "cescobarresi@gmail.com"
