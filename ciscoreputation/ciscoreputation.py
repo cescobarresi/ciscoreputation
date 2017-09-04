@@ -46,6 +46,7 @@ def get_data(search_string, search_by='ip'):
     r_wscore = requests.get('https://talosintelligence.com/sb_api/remote_lookup',
             headers={'referer':'https://talosintelligence.com/reputation_center/lookup?search=%s'%search_string},
             params = {'hostname':'SDS', 'query_string':'/score/wbrs/json?url=%s' % search_string}).json()
+
     # would be nice to plot this values
     #r_volume = requests.get('https://talosintelligence.com/sb_api/query_lookup',
     #        params = {
