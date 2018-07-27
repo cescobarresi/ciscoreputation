@@ -1,4 +1,4 @@
-ciscoreputation (2.1.0) xenial; urgency=medium
+ciscoreputation (2.1.2) xenial; urgency=medium
 
   * Added WEB REPUTATION and TALOS BLACKLISTED
 
