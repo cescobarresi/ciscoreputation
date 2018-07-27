@@ -47,6 +47,10 @@ def get_data(search_string, search_by='ip'):
             headers={'referer':'https://talosintelligence.com/reputation_center/lookup?search=%s'%search_string},
             params = {'hostname':'SDS', 'query_string':'/score/wbrs/json?url=%s' % search_string}).json()
 
+    r_talos_blacklist = requests.get('https://www.talosintelligence.com/sb_api/blacklist_lookup',
+            headers={'referer':'https://talosintelligence.com/reputation_center/lookup?search=%s'%search_string},
+            params = {'query_type':'ipaddr', 'query_entry':search_string}).json()
+
     # would be nice to plot this values
     #r_volume = requests.get('https://talosintelligence.com/sb_api/query_lookup',
     #        params = {
@@ -61,6 +65,14 @@ def get_data(search_string, search_by='ip'):
     #            'query_entry':search_string
     #            }).json()
 
+    
+    talos_blacklisted = {'status':False}
+    if 'classifications' in r_talos_blacklist['entry']:
+        talos_blacklisted['status'] = True
+        talos_blacklisted['classifications'] = ", ".join(r_talos_blacklist['entry']['classifications'])
+        talos_blacklisted['first_seen'] = r_talos_blacklist['entry']['first_seen'] + "UTC"
+        talos_blacklisted['expiration'] = r_talos_blacklist['entry']['expiration'] + "UTC"
+
     data = {
         'address':search_string,
         'hostname':r_details['hostname'] if 'hostname' in r_details else "nodata",
@@ -69,7 +81,8 @@ def get_data(search_string, search_by='ip'):
         'month_volume':r_details['monthly_mag'] if 'monthly_mag' in r_details else "nodata",
         'email_reputation':r_details['email_score_name'] if 'email_score_name' in r_details else "nodata",
         'web_reputation':r_details['web_score_name'] if 'web_score_name' in r_details else "nodata",
-        'weighted_reputation_score':r_wscore['response']
+        'weighted_reputation_score':r_wscore['response'],
+        'talos_blacklisted':"Yes" if talos_blacklisted['status'] else "No"
         #'weighted_reputation_score':r_wscore[0]['response']['wbrs']['score'],
         #'volumes':zip(*r_volume['data'])
     }
@@ -119,8 +132,7 @@ def do_main():
     # Output reputation
     elif arguments['reputation']:
         if arguments['--values']:
-            print data['email_reputation']
-            print data['web_reputation']
+            print "%s,%s" % (data['email_reputation'], data['web_reputation'])
         else:
             print "talosintelligence.com data for %s [%s]" % (data['address'], data['hostname'])
             print "Email reputation: %s" % data['email_reputation']
@@ -128,18 +140,20 @@ def do_main():
     # Ouput all
     else:
         if arguments['--values']:
-            print "%s,%s,%s,%s,%s" % (
+            print "%s,%s,%s,%s,%s,%s" % (
                     data['email_reputation'],
                     data['web_reputation'],
                     data['weighted_reputation_score'],
                     data['month_volume'],
-                    data['lastday_volume'])
+                    data['lastday_volume'],
+                    data['talos_blacklisted'])
         else:
             print "talosintelligence.com data for %s [%s] " % (data['address'], data['hostname'])
             print "Email reputation: %s" % data['email_reputation']
             print "Email score: %s" % data['weighted_reputation_score']
             print "Web reputation: %s" % data['web_reputation']
             print "Last month volume: %s\nDay volume: %s" % (data['month_volume'], data['lastday_volume'])
+            print "Talos Security Intelligence Blacklist: %s" % data['talos_blacklisted']
 
 
     raise SystemExit
