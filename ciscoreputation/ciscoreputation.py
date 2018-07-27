@@ -68,6 +68,7 @@ def get_data(search_string, search_by='ip'):
         'lastday_volume':r_details['daily_mag'] if 'daily_mag' in r_details else "nodata",
         'month_volume':r_details['monthly_mag'] if 'monthly_mag' in r_details else "nodata",
         'email_reputation':r_details['email_score_name'] if 'email_score_name' in r_details else "nodata",
+        'web_reputation':r_details['web_score_name'] if 'web_score_name' in r_details else "nodata",
         'weighted_reputation_score':r_wscore['response']
         #'weighted_reputation_score':r_wscore[0]['response']['wbrs']['score'],
         #'volumes':zip(*r_volume['data'])
@@ -119,14 +120,17 @@ def do_main():
     elif arguments['reputation']:
         if arguments['--values']:
             print data['email_reputation']
+            print data['web_reputation']
         else:
             print "talosintelligence.com data for %s [%s]" % (data['address'], data['hostname'])
             print "Email reputation: %s" % data['email_reputation']
+            print "Web reputation: %s" % data['web_reputation']
     # Ouput all
     else:
         if arguments['--values']:
-            print "%s,%s,%s,%s" % (
+            print "%s,%s,%s,%s,%s" % (
                     data['email_reputation'],
+                    data['web_reputation'],
                     data['weighted_reputation_score'],
                     data['month_volume'],
                     data['lastday_volume'])
@@ -134,6 +138,7 @@ def do_main():
             print "talosintelligence.com data for %s [%s] " % (data['address'], data['hostname'])
             print "Email reputation: %s" % data['email_reputation']
             print "Email score: %s" % data['weighted_reputation_score']
+            print "Web reputation: %s" % data['web_reputation']
             print "Last month volume: %s\nDay volume: %s" % (data['month_volume'], data['lastday_volume'])
 
 
