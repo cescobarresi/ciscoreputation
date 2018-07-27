@@ -1,3 +1,9 @@
+ciscoreputation (2.1.0) xenial; urgency=medium
+
+  * Added WEB REPUTATION and TALOS BLACKLISTED
+
+ -- Francesco Barresi <@cescobarresi>  Mon, 27 Jul 2018 15:18:00 +0000
+
 ciscoreputation (2.0.1) xenial; urgency=medium
 
   * Cat and mouse: added REFERER HTTP Header to GET resquests.

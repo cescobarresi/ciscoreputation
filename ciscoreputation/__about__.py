@@ -29,10 +29,10 @@ __uri__ = "https://github.com/cescobarresi/ciscoreputation"
 #    zero or more release candidates (denoted with a ”.rcN” suffix)
 # 
 
-__version__ = "2.0.1"
+__version__ = "2.1.0"
 
 __author__ = "Francesco Barresi"
-__email__ = "cescobarresi@gmail.com"
+__email__ = "francescobarresi@bbfactory.it"
 
 __license__ = "MIT"
-__copyright__ = "2017 %s" % __author__
+__copyright__ = "2018 %s" % __author__
