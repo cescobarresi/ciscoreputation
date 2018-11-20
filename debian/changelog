@@ -1,3 +1,10 @@
+ciscoreputation (2.1.3) xenial; urgency=medium
+
+  * Added 'User-Agent' in HTTP requests
+  * Can run on Python3
+
+ -- Francesco Barresi <@cescobarresi>  Tue, 20 Nov 2018 15:41:00 +0000
+
 ciscoreputation (2.1.2) xenial; urgency=medium
 
   * Added WEB REPUTATION and TALOS BLACKLISTED

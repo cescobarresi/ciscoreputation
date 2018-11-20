@@ -115,6 +115,7 @@ setup(
 
         # Python support
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.7",
 
         # Others
         "Natural Language :: English",
