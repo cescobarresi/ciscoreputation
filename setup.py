@@ -33,9 +33,9 @@ class ChangelogDebPackage(Command):
         self.pyversion = None
     def finalize_options(self):
         if self.version is not None and self.release is not None:
-            raise AssertionError, "Can't set 'version' when using 'release'"
+            raise AssertionError("Can't set 'version' when using 'release'")
         if self.pyversion and self.version:
-            raise AssertionError, "Conflicting options --pyversion and --version="
+            raise AssertionError("Conflicting options --pyversion and --version=")
         if self.pyversion:
             self.version = about['__version__']
     def run(self):
@@ -76,7 +76,7 @@ class BuildDebPackage(Command):
         os.system('cd %s; dpkg-buildpackage -uc -us' % source_dir)
         os.system('rm -r %s' % source_dir)
         os.system('rm -r ./*.egg-info/')
-        print "DEB package generated in %s" % os.path.join(base_dir, "dist/deb/")
+        print("DEB package generated in %s" % os.path.join(base_dir, "dist/deb/") )
 
 class CleanCommand(Command):
     """Custom clean command to tidy up the project root."""
