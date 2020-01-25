@@ -26,9 +26,11 @@ Options:
 
 Note: Use wisely, don't query like crazy.
 """
-from __about__ import __version__
 from docopt import docopt
 import requests, re, socket
+
+from .__about__ import __version__
+
 
 def get_data(search_string, search_by='ip'):
     """
